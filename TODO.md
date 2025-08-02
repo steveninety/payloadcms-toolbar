@@ -1,0 +1,3 @@
+- Recreate DefaultEditView without doc controls and with custom toolbar on the right.
+- Finish toolbar
+- Publsh component to npm 

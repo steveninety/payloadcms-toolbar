@@ -101,3 +101,17 @@ html[data-theme='dark'],
 html[data-theme='light'] {
   opacity: initial;
 }
+
+:is([class*='u-text-style-'], h1, h2, h3, h4, h5, h6, p, blockquote, span) {
+  display: flow-root;
+}
+:is([class*='u-text-style-'], h1, h2, h3, h4, h5, h6, p, blockquote, span)::before {
+  content: '';
+  display: table;
+  margin-bottom: calc(-0.5lh + 0.38em);
+}
+:is([class*='u-text-style-'], h1, h2, h3, h4, h5, h6, p, blockquote, span)::after {
+  content: '';
+  display: table;
+  margin-bottom: calc(-0.5lh + 0.38em);
+}
