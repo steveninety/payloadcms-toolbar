@@ -17,6 +17,9 @@ import { useOperation } from '@payloadcms/ui'
 import { useTranslation } from '@payloadcms/ui'
 import { PopupList } from '@payloadcms/ui'
 import { ScheduleDrawer } from '@payloadcms/ui/elements/PublishButton/ScheduleDrawer'
+import Toolbar, { TooltipTool } from '../Toolbar'
+import { UploadIcon } from 'lucide-react'
+import { cn } from '@/utilities/ui'
 
 export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
   const {
@@ -206,7 +209,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
 
   return (
     <React.Fragment>
-      <FormSubmit
+      {/* <FormSubmit
         buttonId="action-save"
         disabled={!canPublish}
         enableSubMenu={canSchedulePublish}
@@ -242,7 +245,28 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
         type="button"
       >
         {localization ? defaultLabel : label}
-      </FormSubmit>
+      </FormSubmit> */}
+      <TooltipTool tooltip={localization ? defaultLabel : label}>
+        <button
+          // ref={ref}
+          className={cn(
+            'w-8 flex flex-col items-center relative p-1 gap-1 rounded-sm !border-none',
+            disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-muted',
+          )}
+          id="action-save"
+          disabled={!canPublish}
+          // enableSubMenu={canSchedulePublish}
+          onClick={defaultPublish}
+        >
+          <Toolbar.TopRow>
+            <Toolbar.TopRowDot color="bg-green-400" />
+          </Toolbar.TopRow>
+          <Toolbar.IconSlot>
+            <UploadIcon />
+          </Toolbar.IconSlot>
+          <Toolbar.BottomRow>30s</Toolbar.BottomRow>
+        </button>
+      </TooltipTool>
       {canSchedulePublish && isModalOpen(drawerSlug) && (
         <ScheduleDrawer
           defaultType={!hasNewerVersions ? 'unpublish' : 'publish'}

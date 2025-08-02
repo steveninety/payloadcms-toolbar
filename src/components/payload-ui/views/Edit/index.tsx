@@ -449,58 +449,14 @@ export function DefaultEditView({
         globalSlug && `global-edit--${globalSlug}`,
         collectionSlug && `collection-edit--${collectionSlug}`,
         isLivePreviewing && previewWindowType === 'iframe' && `${baseClass}--is-live-previewing`,
-        'flex flex-col md:flex-row-reverse sticky top-0',
       ]
         .filter(Boolean)
         .join(' ')}
     >
       <OperationProvider operation={operation}>
-        <DocumentControls
-          apiURL={apiURL}
-          BeforeDocumentControls={BeforeDocumentControls}
-          customComponents={{
-            PreviewButton,
-            PublishButton,
-            SaveButton,
-            SaveDraftButton,
-          }}
-          data={savedDocumentData}
-          disableActions={disableActions || isFolderCollection}
-          disableCreate={disableCreate}
-          EditMenuItems={EditMenuItems}
-          hasPublishPermission={hasPublishPermission}
-          hasSavePermission={hasSavePermission}
-          id={id}
-          isEditing={isEditing}
-          isInDrawer={isInDrawer}
-          onDelete={onDelete}
-          onDrawerCreateNew={clearDoc}
-          onDuplicate={onDuplicate}
-          onSave={onSave}
-          onTakeOver={() =>
-            handleTakeOver(
-              id,
-              collectionSlug,
-              globalSlug,
-              user,
-              true,
-              updateDocumentEditor,
-              setCurrentEditor,
-              documentLockStateRef,
-              isLockingEnabled,
-              setIsReadOnlyForIncomingUser,
-            )
-          }
-          permissions={docPermissions}
-          readOnlyForIncomingUser={isReadOnlyForIncomingUser}
-          redirectAfterDelete={redirectAfterDelete}
-          redirectAfterDuplicate={redirectAfterDuplicate}
-          slug={collectionConfig?.slug || globalConfig?.slug}
-          user={currentEditor}
-        />
         <Form
           action={action}
-          className={`${baseClass}__form`}
+          className={`${baseClass}__form flex flex-col md:flex-row-reverse sticky top-0`}
           disabled={isReadOnlyForIncomingUser || isInitializing || !hasSavePermission}
           disableValidationOnSubmit={!validateBeforeSubmit}
           initialState={!isInitializing && initialState}
@@ -510,126 +466,171 @@ export function DefaultEditView({
           onChange={[onChange]}
           onSuccess={onSave}
         >
-          {isInDrawer && (
-            <DocumentDrawerHeader drawerSlug={drawerSlug} showDocumentID={!isFolderCollection} />
-          )}
-          {isLockingEnabled && shouldShowDocumentLockedModal && (
-            <DocumentLocked
-              handleGoBack={() => handleGoBack({ adminRoute, collectionSlug, router })}
-              isActive={shouldShowDocumentLockedModal}
-              onReadOnly={() => {
-                setIsReadOnlyForIncomingUser(true)
-                setShowTakeOverModal(false)
-              }}
-              onTakeOver={() =>
-                handleTakeOver(
-                  id,
-                  collectionSlug,
-                  globalSlug,
-                  user,
-                  false,
-                  updateDocumentEditor,
-                  setCurrentEditor,
-                  documentLockStateRef,
-                  isLockingEnabled,
-                )
-              }
-              updatedAt={lastUpdateTime}
-              user={currentEditor}
-            />
-          )}
-          {isLockingEnabled && showTakeOverModal && (
-            <DocumentTakeOver
-              handleBackToDashboard={() => handleBackToDashboard({ adminRoute, router })}
-              isActive={showTakeOverModal}
-              onReadOnly={() => {
-                setIsReadOnlyForIncomingUser(true)
-                setShowTakeOverModal(false)
-              }}
-            />
-          )}
-          {!isReadOnlyForIncomingUser && preventLeaveWithoutSaving && <LeaveWithoutSaving />}
-          {!isInDrawer && (
-            <SetDocumentStepNav
-              collectionSlug={collectionConfig?.slug}
-              globalSlug={globalConfig?.slug}
-              id={id}
-              pluralLabel={collectionConfig?.labels?.plural}
-              useAsTitle={collectionConfig?.admin?.useAsTitle}
-            />
-          )}
-          <SetDocumentTitle
-            collectionConfig={collectionConfig}
-            config={config}
-            fallback={depth <= 1 ? id?.toString() : undefined}
-            globalConfig={globalConfig}
+          <DocumentControls
+            apiURL={apiURL}
+            BeforeDocumentControls={BeforeDocumentControls}
+            customComponents={{
+              PreviewButton,
+              PublishButton,
+              SaveButton,
+              SaveDraftButton,
+            }}
+            data={savedDocumentData}
+            disableActions={disableActions || isFolderCollection}
+            disableCreate={disableCreate}
+            EditMenuItems={EditMenuItems}
+            hasPublishPermission={hasPublishPermission}
+            hasSavePermission={hasSavePermission}
+            id={id}
+            isEditing={isEditing}
+            isInDrawer={isInDrawer}
+            onDelete={onDelete}
+            onDrawerCreateNew={clearDoc}
+            onDuplicate={onDuplicate}
+            onSave={onSave}
+            onTakeOver={() =>
+              handleTakeOver(
+                id,
+                collectionSlug,
+                globalSlug,
+                user,
+                true,
+                updateDocumentEditor,
+                setCurrentEditor,
+                documentLockStateRef,
+                isLockingEnabled,
+                setIsReadOnlyForIncomingUser,
+              )
+            }
+            permissions={docPermissions}
+            readOnlyForIncomingUser={isReadOnlyForIncomingUser}
+            redirectAfterDelete={redirectAfterDelete}
+            redirectAfterDuplicate={redirectAfterDuplicate}
+            slug={collectionConfig?.slug || globalConfig?.slug}
+            user={currentEditor}
           />
-          <div
-            className={[
-              `${baseClass}__main-wrapper`,
-              previewWindowType === 'popup' && `${baseClass}--detached`,
-            ]
-              .filter(Boolean)
-              .join(' ')}
-          >
+          <div className="w-full">
+            {isInDrawer && (
+              <DocumentDrawerHeader drawerSlug={drawerSlug} showDocumentID={!isFolderCollection} />
+            )}
+            {isLockingEnabled && shouldShowDocumentLockedModal && (
+              <DocumentLocked
+                handleGoBack={() => handleGoBack({ adminRoute, collectionSlug, router })}
+                isActive={shouldShowDocumentLockedModal}
+                onReadOnly={() => {
+                  setIsReadOnlyForIncomingUser(true)
+                  setShowTakeOverModal(false)
+                }}
+                onTakeOver={() =>
+                  handleTakeOver(
+                    id,
+                    collectionSlug,
+                    globalSlug,
+                    user,
+                    false,
+                    updateDocumentEditor,
+                    setCurrentEditor,
+                    documentLockStateRef,
+                    isLockingEnabled,
+                  )
+                }
+                updatedAt={lastUpdateTime}
+                user={currentEditor}
+              />
+            )}
+            {isLockingEnabled && showTakeOverModal && (
+              <DocumentTakeOver
+                handleBackToDashboard={() => handleBackToDashboard({ adminRoute, router })}
+                isActive={showTakeOverModal}
+                onReadOnly={() => {
+                  setIsReadOnlyForIncomingUser(true)
+                  setShowTakeOverModal(false)
+                }}
+              />
+            )}
+            {!isReadOnlyForIncomingUser && preventLeaveWithoutSaving && <LeaveWithoutSaving />}
+            {!isInDrawer && (
+              <SetDocumentStepNav
+                collectionSlug={collectionConfig?.slug}
+                globalSlug={globalConfig?.slug}
+                id={id}
+                pluralLabel={collectionConfig?.labels?.plural}
+                useAsTitle={collectionConfig?.admin?.useAsTitle}
+              />
+            )}
+            <SetDocumentTitle
+              collectionConfig={collectionConfig}
+              config={config}
+              fallback={depth <= 1 ? id?.toString() : undefined}
+              globalConfig={globalConfig}
+            />
             <div
               className={[
-                `${baseClass}__main`,
-                previewWindowType === 'popup' && `${baseClass}__main--popup-open`,
+                `${baseClass}__main-wrapper`,
+                previewWindowType === 'popup' && `${baseClass}--detached`,
               ]
                 .filter(Boolean)
                 .join(' ')}
             >
-              <DocumentFields
-                AfterFields={AfterFields}
-                BeforeFields={
-                  BeforeFields || (
-                    <Fragment>
-                      {auth && (
-                        <Auth
-                          className={`${baseClass}__auth`}
-                          collectionSlug={collectionConfig.slug}
-                          disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
-                          email={savedDocumentData?.email}
-                          loginWithUsername={auth?.loginWithUsername}
-                          operation={operation}
-                          readOnly={!hasSavePermission}
-                          requirePassword={!id}
-                          setValidateBeforeSubmit={setValidateBeforeSubmit}
-                          useAPIKey={auth.useAPIKey}
-                          username={savedDocumentData?.username}
-                          verify={auth.verify}
-                        />
-                      )}
-                      {upload && (
-                        <React.Fragment>
-                          <UploadControlsProvider>
-                            {CustomUpload || (
-                              <Upload
-                                collectionSlug={collectionConfig.slug}
-                                initialState={initialState}
-                                uploadConfig={upload}
-                                UploadControls={UploadControls}
-                              />
-                            )}
-                          </UploadControlsProvider>
-                        </React.Fragment>
-                      )}
-                    </Fragment>
-                  )
-                }
-                Description={Description}
-                docPermissions={docPermissions}
-                fields={docConfig.fields}
-                forceSidebarWrap={isLivePreviewing}
-                readOnly={isReadOnlyForIncomingUser || !hasSavePermission}
-                schemaPathSegments={schemaPathSegments}
-              />
-              {AfterDocument}
+              <div
+                className={[
+                  `${baseClass}__main`,
+                  previewWindowType === 'popup' && `${baseClass}__main--popup-open`,
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
+                <DocumentFields
+                  AfterFields={AfterFields}
+                  BeforeFields={
+                    BeforeFields || (
+                      <Fragment>
+                        {auth && (
+                          <Auth
+                            className={`${baseClass}__auth`}
+                            collectionSlug={collectionConfig.slug}
+                            disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
+                            email={savedDocumentData?.email}
+                            loginWithUsername={auth?.loginWithUsername}
+                            operation={operation}
+                            readOnly={!hasSavePermission}
+                            requirePassword={!id}
+                            setValidateBeforeSubmit={setValidateBeforeSubmit}
+                            useAPIKey={auth.useAPIKey}
+                            username={savedDocumentData?.username}
+                            verify={auth.verify}
+                          />
+                        )}
+                        {upload && (
+                          <React.Fragment>
+                            <UploadControlsProvider>
+                              {CustomUpload || (
+                                <Upload
+                                  collectionSlug={collectionConfig.slug}
+                                  initialState={initialState}
+                                  uploadConfig={upload}
+                                  UploadControls={UploadControls}
+                                />
+                              )}
+                            </UploadControlsProvider>
+                          </React.Fragment>
+                        )}
+                      </Fragment>
+                    )
+                  }
+                  Description={Description}
+                  docPermissions={docPermissions}
+                  fields={docConfig.fields}
+                  forceSidebarWrap={isLivePreviewing}
+                  readOnly={isReadOnlyForIncomingUser || !hasSavePermission}
+                  schemaPathSegments={schemaPathSegments}
+                />
+                {AfterDocument}
+              </div>
+              {isLivePreviewEnabled && !isInDrawer && (
+                <LivePreviewWindow collectionSlug={collectionSlug} globalSlug={globalSlug} />
+              )}
             </div>
-            {isLivePreviewEnabled && !isInDrawer && (
-              <LivePreviewWindow collectionSlug={collectionSlug} globalSlug={globalSlug} />
-            )}
           </div>
         </Form>
       </OperationProvider>

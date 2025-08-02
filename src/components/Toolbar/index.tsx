@@ -30,7 +30,7 @@ const ToolContext = React.createContext<{ selected: boolean }>({ selected: false
 
 export function ToolbarWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-row md:flex-col sticky top-0 bg-background z-10 items-center border border-border rounded-lg px-4">
+    <div className="flex flex-row md:flex-col sticky top-0 bg-background z-10 items-center border border-border rounded-lg px-4 h-fit">
       {children}
     </div>
   )

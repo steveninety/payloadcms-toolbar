@@ -214,10 +214,8 @@ export const DocumentControls: React.FC<{
               )}
             </Fragment>
           )}
-          <SaveDraftButton />
-          <TB.TooltipTool tooltip={t('version:saveDraft')}>
-            <PublishButton />
-          </TB.TooltipTool>
+          {/* <SaveDraftButton />
+          <PublishButton /> */}
           <TB.TooltipTool tooltip="More Options">
             <TB.DropdownTool
               dropdownItems={
