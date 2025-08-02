@@ -30,7 +30,7 @@ const ToolContext = React.createContext<{ selected: boolean }>({ selected: false
 
 export function ToolbarWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-row md:flex-col sticky top-0 bg-background z-10 items-center border border-border rounded-lg px-4 h-fit">
+    <div className="flex flex-row md:flex-col px-4 md:px-0 mx-0 md:mx-4 sticky top-0 md:top-4 bg-background z-10 items-center border border-border rounded-lg h-fit">
       {children}
     </div>
   )
@@ -49,7 +49,7 @@ interface TopRowProps {
 export function TopRow({ children, variant = 'text', color = 'bg-green-400' }: TopRowProps) {
   return (
     <div className="relative">
-      <div className="text-xs u-text-style- opacity-0 pointer-events-none">-</div>
+      <div className="text-sm u-text-style- opacity-0 pointer-events-none">-</div>
       {children ? children : null}
     </div>
   )
@@ -71,9 +71,9 @@ interface BottomRowProps {
 
 export function BottomRow({ children }: BottomRowProps) {
   return children ? (
-    <div className="text-xs u-text-style-">{children}</div>
+    <div className="text-sm u-text-style-">{children}</div>
   ) : (
-    <div className="text-xs u-text-style- opacity-0 pointer-events-none">-</div>
+    <div className="text-sm u-text-style- opacity-0 pointer-events-none">-</div>
   )
 }
 
