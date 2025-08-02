@@ -3,18 +3,26 @@ import React from 'react'
 
 import type { Props } from '@payloadcms/ui'
 
-import { Button } from '@payloadcms/ui'
+import { Button } from './Button'
 import {
   useForm,
   useFormBackgroundProcessing,
   useFormInitializing,
   useFormProcessing,
 } from '@payloadcms/ui'
-import './index.scss'
+// import './index.scss'
 
 const baseClass = 'form-submit'
 
-export const FormSubmit: React.FC<Props> = (props) => {
+export const FormSubmit: React.FC<
+  Props & {
+    render?: (props: {
+      buttonProps: any
+      children: React.ReactNode
+      disabled: boolean
+    }) => React.ReactNode
+  }
+> = (props) => {
   const {
     type = 'submit',
     buttonId: id,
@@ -23,6 +31,7 @@ export const FormSubmit: React.FC<Props> = (props) => {
     onClick,
     programmaticSubmit,
     ref,
+    render,
   } = props
 
   const processing = useFormProcessing()
@@ -54,6 +63,7 @@ export const FormSubmit: React.FC<Props> = (props) => {
         disabled={canSave ? undefined : true}
         id={id}
         onClick={handleClick}
+        render={render}
         type={type}
       >
         {children}

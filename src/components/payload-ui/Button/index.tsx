@@ -11,9 +11,9 @@ import { SwapIcon } from '@payloadcms/ui'
 import { XIcon } from '@payloadcms/ui'
 import { Link } from '@payloadcms/ui'
 import { Popup } from '@payloadcms/ui'
-import './index.scss'
 import { Tooltip } from '@payloadcms/ui'
 import { Button as ButtonOriginal } from '@payloadcms/ui'
+// import './index.scss'
 
 type Props = ComponentProps<typeof ButtonOriginal>
 
@@ -51,7 +51,15 @@ export const ButtonContents = ({ children, icon, showTooltip, tooltip }) => {
   )
 }
 
-export const Button: React.FC<Props> = (props) => {
+export const Button: React.FC<
+  Props & {
+    render?: (props: {
+      buttonProps: any
+      children: React.ReactNode
+      disabled: boolean
+    }) => React.ReactNode
+  }
+> = (props) => {
   const {
     id,
     type = 'button',
@@ -70,6 +78,7 @@ export const Button: React.FC<Props> = (props) => {
     onClick,
     onMouseDown,
     ref,
+    render,
     round,
     size = 'medium',
     SubMenuPopupContent,
@@ -133,53 +142,57 @@ export const Button: React.FC<Props> = (props) => {
   let buttonElement
   let prefetch
 
-  switch (el) {
-    case 'anchor':
-      buttonElement = (
-        <a
-          {...buttonProps}
-          href={!disabled ? url : undefined}
-          ref={ref as React.RefObject<HTMLAnchorElement>}
-        >
-          <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
-            {children}
-          </ButtonContents>
-        </a>
-      )
-      break
+  const buttonContents = (
+    <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
+      {children}
+    </ButtonContents>
+  )
 
-    case 'link':
-      if (disabled) {
+  // If render prop is provided, use custom rendering
+  if (render) {
+    buttonElement = render({
+      buttonProps,
+      children: buttonContents,
+      disabled: !!disabled,
+    })
+  } else {
+    // Default rendering logic
+    switch (el) {
+      case 'anchor':
         buttonElement = (
-          <div {...buttonProps}>
-            <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
-              {children}
-            </ButtonContents>
-          </div>
+          <a
+            {...buttonProps}
+            href={!disabled ? url : undefined}
+            ref={ref as React.RefObject<HTMLAnchorElement>}
+          >
+            {buttonContents}
+          </a>
         )
-      }
+        break
 
-      buttonElement = (
-        <Link {...buttonProps} href={to || url} prefetch={prefetch}>
-          <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
-            {children}
-          </ButtonContents>
-        </Link>
-      )
+      case 'link':
+        if (disabled) {
+          buttonElement = <div {...buttonProps}>{buttonContents}</div>
+        }
 
-      break
+        buttonElement = (
+          <Link {...buttonProps} href={to || url} prefetch={prefetch}>
+            {buttonContents}
+          </Link>
+        )
 
-    default:
-      const Tag = el // eslint-disable-line no-case-declarations
+        break
 
-      buttonElement = (
-        <Tag ref={ref} {...buttonProps}>
-          <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
-            {children}
-          </ButtonContents>
-        </Tag>
-      )
-      break
+      default:
+        const Tag = el // eslint-disable-line no-case-declarations
+
+        buttonElement = (
+          <Tag ref={ref} {...buttonProps}>
+            {buttonContents}
+          </Tag>
+        )
+        break
+    }
   }
   if (SubMenuPopupContent) {
     return (
