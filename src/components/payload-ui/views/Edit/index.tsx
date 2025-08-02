@@ -8,12 +8,16 @@ import { formatAdminURL } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { FormProps } from '@payloadcms/ui'
+import type { LockedState } from '@payloadcms/ui/utilities/buildFormState'
 
-import { DocumentControls, useDocumentDrawerContext } from '@payloadcms/ui'
+import { DocumentControls } from '../DocumentControls'
+import { DocumentDrawerHeader } from '@payloadcms/ui/elements/DocumentDrawer/DrawerHeader'
+import { useDocumentDrawerContext } from '@payloadcms/ui'
 import { DocumentFields } from '@payloadcms/ui'
 import { DocumentLocked } from '@payloadcms/ui'
 import { DocumentTakeOver } from '@payloadcms/ui'
 import { LeaveWithoutSaving } from '@payloadcms/ui'
+import { LivePreviewWindow } from '@payloadcms/ui/elements/LivePreview/Window'
 import { Upload } from '@payloadcms/ui'
 import { Form } from '@payloadcms/ui'
 import { useAuth } from '@payloadcms/ui'
@@ -21,26 +25,19 @@ import { useConfig } from '@payloadcms/ui'
 import { useDocumentEvents } from '@payloadcms/ui'
 import { useDocumentInfo } from '@payloadcms/ui'
 import { useEditDepth } from '@payloadcms/ui'
+import { useLivePreviewContext } from '@/components/payload-ui/providers/LivePreview/context'
 import { OperationProvider } from '@payloadcms/ui'
 import { useRouteTransition } from '@payloadcms/ui'
 import { useServerFunctions } from '@payloadcms/ui'
-import { useUploadEdits } from '@payloadcms/ui'
-// import { Auth } from 'payload'
-import type { SetDocumentStepNav, SetDocumentTitle } from '@payloadcms/ui'
-
-import { DocumentDrawerHeader } from '@payloadcms/ui/elements/DocumentDrawer/DrawerHeader'
-
-import { LivePreviewWindow } from '@payloadcms/ui/elements/LivePreview/Window'
-
-import { useLivePreviewContext } from 'node_modules/payload/dist/'
-
 import { UploadControlsProvider } from '@payloadcms/ui/providers/UploadControls'
-
+import { useUploadEdits } from '@payloadcms/ui'
 import { abortAndIgnore, handleAbortRef } from '@payloadcms/ui/utilities/abortAndIgnore'
 import { handleBackToDashboard } from '@payloadcms/ui/utilities/handleBackToDashboard'
 import { handleGoBack } from '@payloadcms/ui/utilities/handleGoBack'
 import { handleTakeOver } from '@payloadcms/ui/utilities/handleTakeOver'
-import '@payloadcms/ui/views/Edit/index.scss'
+import { SetDocumentStepNav, SetDocumentTitle } from '@payloadcms/ui'
+import TB from '@/components/Toolbar'
+// import './index.scss'
 
 const baseClass = 'collection-edit'
 
@@ -72,7 +69,6 @@ export function DefaultEditView({
     disableLeaveWithoutSaving,
     docPermissions,
     documentIsLocked,
-    documentLockState,
     getDocPermissions,
     getDocPreferences,
     globalSlug,
@@ -82,12 +78,10 @@ export function DefaultEditView({
     initialState,
     isEditing,
     isInitializing,
-    isTrashed,
     lastUpdateTime,
     redirectAfterCreate,
     redirectAfterDelete,
     redirectAfterDuplicate,
-    redirectAfterRestore,
     savedDocumentData,
     setCurrentEditor,
     setDocumentIsLocked,
@@ -101,7 +95,6 @@ export function DefaultEditView({
     drawerSlug,
     onDelete,
     onDuplicate,
-    onRestore,
     onSave: onSaveFromContext,
   } = useDocumentDrawerContext()
 
@@ -170,6 +163,16 @@ export function DefaultEditView({
 
   const isLockExpired = Date.now() > lockExpiryTime
 
+  const documentLockStateRef = useRef<{
+    hasShownLockedModal: boolean
+    isLocked: boolean
+    user: ClientUser | number | string
+  } | null>({
+    hasShownLockedModal: false,
+    isLocked: false,
+    user: null,
+  })
+
   const schemaPathSegments = useMemo(() => [entitySlug], [entitySlug])
 
   const [validateBeforeSubmit, setValidateBeforeSubmit] = useState(() => {
@@ -180,15 +183,13 @@ export function DefaultEditView({
     return false
   })
 
-  const nextHrefRef = React.useRef<null | string>(null)
-
   const handleDocumentLocking = useCallback(
     (lockedState: LockedState) => {
       setDocumentIsLocked(true)
       const previousOwnerID =
-        typeof documentLockState.current?.user === 'object'
-          ? documentLockState.current?.user?.id
-          : documentLockState.current?.user
+        typeof documentLockStateRef.current?.user === 'object'
+          ? documentLockStateRef.current?.user?.id
+          : documentLockStateRef.current?.user
 
       if (lockedState) {
         const lockedUserID =
@@ -196,14 +197,14 @@ export function DefaultEditView({
             ? lockedState.user
             : lockedState.user.id
 
-        if (!documentLockState.current || lockedUserID !== previousOwnerID) {
+        if (!documentLockStateRef.current || lockedUserID !== previousOwnerID) {
           if (previousOwnerID === user.id && lockedUserID !== user.id) {
             setShowTakeOverModal(true)
-            documentLockState.current.hasShownLockedModal = true
+            documentLockStateRef.current.hasShownLockedModal = true
           }
 
-          documentLockState.current = {
-            hasShownLockedModal: documentLockState.current?.hasShownLockedModal || false,
+          documentLockStateRef.current = {
+            hasShownLockedModal: documentLockStateRef.current?.hasShownLockedModal || false,
             isLocked: true,
             user: lockedState.user as ClientUser,
           }
@@ -211,51 +212,8 @@ export function DefaultEditView({
         }
       }
     },
-    [documentLockState, setCurrentEditor, setDocumentIsLocked, user?.id],
+    [setCurrentEditor, setDocumentIsLocked, user?.id],
   )
-
-  const handlePrevent = useCallback((nextHref: null | string) => {
-    nextHrefRef.current = nextHref
-  }, [])
-
-  const handleLeaveConfirm = useCallback(async () => {
-    const lockUser = documentLockState.current?.user
-
-    const isLockOwnedByCurrentUser =
-      typeof lockUser === 'object' ? lockUser?.id === user?.id : lockUser === user?.id
-
-    if (isLockingEnabled && documentIsLocked && (id || globalSlug)) {
-      // Check where user is trying to go
-      const nextPath = nextHrefRef.current ? new URL(nextHrefRef.current).pathname : ''
-      const isInternalView = ['/preview', '/api', '/versions'].some((path) =>
-        nextPath.includes(path),
-      )
-
-      // Only retain the lock if the user is still viewing the document
-      if (!isInternalView) {
-        if (isLockOwnedByCurrentUser) {
-          try {
-            await unlockDocument(id, collectionSlug ?? globalSlug)
-            setDocumentIsLocked(false)
-            setCurrentEditor(null)
-          } catch (err) {
-            console.error('Failed to unlock before leave', err)
-          }
-        }
-      }
-    }
-  }, [
-    collectionSlug,
-    documentIsLocked,
-    documentLockState,
-    globalSlug,
-    id,
-    isLockingEnabled,
-    setCurrentEditor,
-    setDocumentIsLocked,
-    unlockDocument,
-    user?.id,
-  ])
 
   const onSave = useCallback(
     async (json): Promise<FormState> => {
@@ -383,7 +341,7 @@ export function DefaultEditView({
 
       const docPreferences = await getDocPreferences()
 
-      const result = await getFormState({
+      const { lockedState, state } = await getFormState({
         id,
         collectionSlug,
         docPermissions,
@@ -400,12 +358,6 @@ export function DefaultEditView({
         signal: controller.signal,
         updateLastEdited,
       })
-
-      if (!result) {
-        return
-      }
-
-      const { lockedState, state } = result
 
       if (isLockingEnabled) {
         handleDocumentLocking(lockedState)
@@ -433,9 +385,38 @@ export function DefaultEditView({
   // Clean up when the component unmounts or when the document is unlocked
   useEffect(() => {
     return () => {
+      if (isLockingEnabled && documentIsLocked && (id || globalSlug)) {
+        // Only retain the lock if the user is still viewing the document
+        const shouldUnlockDocument = !['preview', 'api', 'versions'].some((path) =>
+          window.location.pathname.includes(path),
+        )
+        if (shouldUnlockDocument) {
+          // Check if this user is still the current editor
+          if (
+            typeof documentLockStateRef.current?.user === 'object'
+              ? documentLockStateRef.current?.user?.id === user?.id
+              : documentLockStateRef.current?.user === user?.id
+          ) {
+            void unlockDocument(id, collectionSlug ?? globalSlug)
+            setDocumentIsLocked(false)
+            setCurrentEditor(null)
+          }
+        }
+      }
+
       setShowTakeOverModal(false)
     }
-  }, [])
+  }, [
+    collectionSlug,
+    globalSlug,
+    id,
+    unlockDocument,
+    user,
+    setCurrentEditor,
+    isLockingEnabled,
+    documentIsLocked,
+    setDocumentIsLocked,
+  ])
 
   useEffect(() => {
     const abortOnChange = abortOnChangeRef.current
@@ -455,7 +436,7 @@ export function DefaultEditView({
       : currentEditor !== user?.id) &&
     !isReadOnlyForIncomingUser &&
     !showTakeOverModal &&
-    !documentLockState.current?.hasShownLockedModal &&
+    !documentLockStateRef.current?.hasShownLockedModal &&
     !isLockExpired
 
   const isFolderCollection = config.folders && collectionSlug === config.folders?.slug
@@ -468,15 +449,59 @@ export function DefaultEditView({
         globalSlug && `global-edit--${globalSlug}`,
         collectionSlug && `collection-edit--${collectionSlug}`,
         isLivePreviewing && previewWindowType === 'iframe' && `${baseClass}--is-live-previewing`,
+        'flex flex-col md:flex-row-reverse sticky top-0',
       ]
         .filter(Boolean)
         .join(' ')}
     >
       <OperationProvider operation={operation}>
+        <DocumentControls
+          apiURL={apiURL}
+          BeforeDocumentControls={BeforeDocumentControls}
+          customComponents={{
+            PreviewButton,
+            PublishButton,
+            SaveButton,
+            SaveDraftButton,
+          }}
+          data={savedDocumentData}
+          disableActions={disableActions || isFolderCollection}
+          disableCreate={disableCreate}
+          EditMenuItems={EditMenuItems}
+          hasPublishPermission={hasPublishPermission}
+          hasSavePermission={hasSavePermission}
+          id={id}
+          isEditing={isEditing}
+          isInDrawer={isInDrawer}
+          onDelete={onDelete}
+          onDrawerCreateNew={clearDoc}
+          onDuplicate={onDuplicate}
+          onSave={onSave}
+          onTakeOver={() =>
+            handleTakeOver(
+              id,
+              collectionSlug,
+              globalSlug,
+              user,
+              true,
+              updateDocumentEditor,
+              setCurrentEditor,
+              documentLockStateRef,
+              isLockingEnabled,
+              setIsReadOnlyForIncomingUser,
+            )
+          }
+          permissions={docPermissions}
+          readOnlyForIncomingUser={isReadOnlyForIncomingUser}
+          redirectAfterDelete={redirectAfterDelete}
+          redirectAfterDuplicate={redirectAfterDuplicate}
+          slug={collectionConfig?.slug || globalConfig?.slug}
+          user={currentEditor}
+        />
         <Form
           action={action}
           className={`${baseClass}__form`}
-          disabled={isReadOnlyForIncomingUser || isInitializing || !hasSavePermission || isTrashed}
+          disabled={isReadOnlyForIncomingUser || isInitializing || !hasSavePermission}
           disableValidationOnSubmit={!validateBeforeSubmit}
           initialState={!isInitializing && initialState}
           isDocumentForm={true}
@@ -505,7 +530,7 @@ export function DefaultEditView({
                   false,
                   updateDocumentEditor,
                   setCurrentEditor,
-                  documentLockState,
+                  documentLockStateRef,
                   isLockingEnabled,
                 )
               }
@@ -523,15 +548,12 @@ export function DefaultEditView({
               }}
             />
           )}
-          {!isReadOnlyForIncomingUser && preventLeaveWithoutSaving && (
-            <LeaveWithoutSaving onConfirm={handleLeaveConfirm} onPrevent={handlePrevent} />
-          )}
+          {!isReadOnlyForIncomingUser && preventLeaveWithoutSaving && <LeaveWithoutSaving />}
           {!isInDrawer && (
             <SetDocumentStepNav
               collectionSlug={collectionConfig?.slug}
               globalSlug={globalConfig?.slug}
               id={id}
-              isTrashed={isTrashed}
               pluralLabel={collectionConfig?.labels?.plural}
               useAsTitle={collectionConfig?.admin?.useAsTitle}
             />
@@ -541,52 +563,6 @@ export function DefaultEditView({
             config={config}
             fallback={depth <= 1 ? id?.toString() : undefined}
             globalConfig={globalConfig}
-          />
-          <DocumentControls
-            apiURL={apiURL}
-            BeforeDocumentControls={BeforeDocumentControls}
-            customComponents={{
-              PreviewButton,
-              PublishButton,
-              SaveButton,
-              SaveDraftButton,
-            }}
-            data={savedDocumentData}
-            disableActions={disableActions || isFolderCollection || isTrashed}
-            disableCreate={disableCreate}
-            EditMenuItems={EditMenuItems}
-            hasPublishPermission={hasPublishPermission}
-            hasSavePermission={hasSavePermission}
-            id={id}
-            isEditing={isEditing}
-            isInDrawer={isInDrawer}
-            isTrashed={isTrashed}
-            onDelete={onDelete}
-            onDrawerCreateNew={clearDoc}
-            onDuplicate={onDuplicate}
-            onRestore={onRestore}
-            onSave={onSave}
-            onTakeOver={() =>
-              handleTakeOver(
-                id,
-                collectionSlug,
-                globalSlug,
-                user,
-                true,
-                updateDocumentEditor,
-                setCurrentEditor,
-                documentLockState,
-                isLockingEnabled,
-                setIsReadOnlyForIncomingUser,
-              )
-            }
-            permissions={docPermissions}
-            readOnlyForIncomingUser={isReadOnlyForIncomingUser}
-            redirectAfterDelete={redirectAfterDelete}
-            redirectAfterDuplicate={redirectAfterDuplicate}
-            redirectAfterRestore={redirectAfterRestore}
-            slug={collectionConfig?.slug || globalConfig?.slug}
-            user={currentEditor}
           />
           <div
             className={[
@@ -646,8 +622,7 @@ export function DefaultEditView({
                 docPermissions={docPermissions}
                 fields={docConfig.fields}
                 forceSidebarWrap={isLivePreviewing}
-                isTrashed={isTrashed}
-                readOnly={isReadOnlyForIncomingUser || !hasSavePermission || isTrashed}
+                readOnly={isReadOnlyForIncomingUser || !hasSavePermission}
                 schemaPathSegments={schemaPathSegments}
               />
               {AfterDocument}

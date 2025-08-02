@@ -13,7 +13,7 @@ import {
   ZapIcon,
 } from 'lucide-react'
 import React from 'react'
-import { DefaultEditView, Form, PublishButton, SaveButton, useTranslation } from '@payloadcms/ui'
+import { Form, PublishButton, SaveButton, useTranslation } from '@payloadcms/ui'
 import { Toggle } from '@/components/ui/toggle'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import {
@@ -29,11 +29,15 @@ import { SaveDraftButton } from '../payload-ui/SaveDraftButton'
 const ToolContext = React.createContext<{ selected: boolean }>({ selected: false })
 
 export function ToolbarWrapper({ children }: { children: React.ReactNode }) {
-  return <div className="flex items-center border border-border rounded-lg ">{children}</div>
+  return (
+    <div className="flex flex-row md:flex-col sticky top-0 bg-background z-10 items-center border border-border rounded-lg px-4">
+      {children}
+    </div>
+  )
 }
 
 export function Group({ children }: { children: React.ReactNode }) {
-  return <div className="flex items-center space-x-1 m-0.5">{children}</div>
+  return <div className="flex flex-row md:flex-col items-center space-x-1 m-0.5">{children}</div>
 }
 
 interface TopRowProps {
@@ -236,209 +240,11 @@ export default function Toolbar(props: DocumentViewClientProps) {
   const [multiSelectValues, setMultiSelectValues] = React.useState<string[]>([])
   const { t } = useTranslation()
 
-  return (
-    <>
-      <Form>
-        <TooltipProvider>
-          <div className="flex flex-col gap-4 m-4">
-            {/* Original variants */}
-            <ToolbarWrapper>
-              <Group>
-                <SaveDraftButton />
-                <TooltipTool tooltip={t('version:saveDraft')}>
-                  <PublishButton />
-                </TooltipTool>
-                {/* <TooltipTool tooltip="Upload">
-                    <Tool
-                      variant="toggle"
-                      selected={selectedTool === 'upload'}
-                      onClick={() => setSelectedTool(selectedTool === 'upload' ? null : 'upload')}
-                    >
-                      <TopRow>2</TopRow>
-                      <IconSlot>
-                        <UploadIcon />
-                      </IconSlot>
-                      <BottomRow></BottomRow>
-                    </Tool>
-                  </TooltipTool> */}
-                <TooltipTool tooltip="More Options">
-                  <DropdownTool
-                    dropdownItems={
-                      <div className="flex items-center space-x-1">
-                        <Tool>
-                          <TopRow variant="dot" color="bg-blue-400" />
-                          <IconSlot>
-                            <PlusIcon />
-                          </IconSlot>
-                          <BottomRow>Create new</BottomRow>
-                        </Tool>
-                        <Tool>
-                          <TopRow variant="text">3</TopRow>
-                          <IconSlot>
-                            <CopyIcon />
-                          </IconSlot>
-                          <BottomRow>Duplicate</BottomRow>
-                        </Tool>
-                        <Tool>
-                          <TopRow color="bg-yellow-400" />
-                          <IconSlot>
-                            <TrashIcon />
-                          </IconSlot>
-                          <BottomRow>Delete</BottomRow>
-                        </Tool>
-                      </div>
-                    }
-                  >
-                    <TopRow color="bg-red-400" />
-                    <IconSlot>
-                      <EllipsisIcon />
-                    </IconSlot>
-                    <BottomRow></BottomRow>
-                  </DropdownTool>
-                </TooltipTool>
-              </Group>
-              <Group>
-                <TooltipTool tooltip="Views">
-                  <DropdownTool
-                    dropdownItems={
-                      <div className="flex items-center space-x-1">
-                        <Tool>
-                          <TopRow variant="dot" color="bg-blue-400" />
-                          <IconSlot>
-                            <Edit />
-                          </IconSlot>
-                          <BottomRow>Edit</BottomRow>
-                        </Tool>
-                        <Tool>
-                          <TopRow variant="text">3</TopRow>
-                          <IconSlot>
-                            <LayersIcon />
-                          </IconSlot>
-                          <BottomRow>Versions</BottomRow>
-                        </Tool>
-                        <Tool>
-                          <TopRow color="bg-yellow-400" />
-                          <IconSlot>
-                            <ZapIcon />
-                          </IconSlot>
-                          <BottomRow>API</BottomRow>
-                        </Tool>
-                      </div>
-                    }
-                  >
-                    <TopRow color="bg-red-400" />
-                    <IconSlot>
-                      <EllipsisIcon />
-                    </IconSlot>
-                    <BottomRow></BottomRow>
-                  </DropdownTool>
-                </TooltipTool>
-              </Group>
-            </ToolbarWrapper>
-
-            {/* Shadcn Toggle variant */}
-            {/* <ToolbarWrapper title="Shadcn Toggle:">
-                <Group>
-                  <TooltipTool tooltip={t('version:saveDraft')}>
-                    <Tool
-                      variant="shadcn-toggle"
-                      selected={selectedTool === 'save1'}
-                      onClick={() => setSelectedTool(selectedTool === 'save1' ? null : 'save1')}
-                    >
-                      <TopRow variant="dot" color="bg-green-400" />
-                      <IconSlot>
-                        <SaveIcon />
-                      </IconSlot>
-                      <BottomRow>30s</BottomRow>
-                    </Tool>
-                  </TooltipTool>
-                  <TooltipTool tooltip="Upload">
-                    <Tool
-                      variant="shadcn-toggle"
-                      selected={selectedTool === 'upload1'}
-                      onClick={() => setSelectedTool(selectedTool === 'upload1' ? null : 'upload1')}
-                    >
-                      <TopRow variant="text">2</TopRow>
-                      <IconSlot>
-                        <UploadIcon />
-                      </IconSlot>
-                      <BottomRow></BottomRow>
-                    </Tool>
-                  </TooltipTool>
-                </Group>
-              </ToolbarWrapper> */}
-
-            {/* Single Select ToggleGroup */}
-            {/* <ToolbarWrapper title="Single Select:">
-                <ToggleGroup
-                  type="single"
-                  value={singleSelectValue}
-                  onValueChange={(value) => value && setSingleSelectValue(value)}
-                  className="flex items-center space-x-1 m-0.5"
-                >
-                  <ToggleGroupTool value="save" aria-label="Save">
-                    <TopRow variant="dot" color="bg-green-400" />
-                    <IconSlot>
-                      <SaveIcon />
-                    </IconSlot>
-                    <BottomRow>30s</BottomRow>
-                  </ToggleGroupTool>
-                  <ToggleGroupTool value="upload" aria-label="Upload">
-                    <TopRow variant="text">2</TopRow>
-                    <IconSlot>
-                      <UploadIcon />
-                    </IconSlot>
-                    <BottomRow></BottomRow>
-                  </ToggleGroupTool>
-                  <ToggleGroupTool value="ellipsis" aria-label="More">
-                    <TopRow color="bg-red-400" />
-                    <IconSlot>
-                      <EllipsisIcon />
-                    </IconSlot>
-                    <BottomRow></BottomRow>
-                  </ToggleGroupTool>
-                </ToggleGroup>
-              </ToolbarWrapper> */}
-
-            {/* Multi Select ToggleGroup */}
-            {/* <ToolbarWrapper title="Multi Select:">
-                <ToggleGroup
-                  type="multiple"
-                  value={multiSelectValues}
-                  onValueChange={setMultiSelectValues}
-                  className="flex items-center space-x-1 m-0.5"
-                >
-                  <ToggleGroupTool value="save" aria-label="Save">
-                    <TopRow variant="dot" color="bg-green-400" />
-                    <IconSlot>
-                      <SaveIcon />
-                    </IconSlot>
-                    <BottomRow>30s</BottomRow>
-                  </ToggleGroupTool>
-                  <ToggleGroupTool value="upload" aria-label="Upload">
-                    <TopRow variant="text">2</TopRow>
-                    <IconSlot>
-                      <UploadIcon />
-                    </IconSlot>
-                    <BottomRow></BottomRow>
-                  </ToggleGroupTool>
-                  <ToggleGroupTool value="ellipsis" aria-label="More">
-                    <TopRow color="bg-red-400" />
-                    <IconSlot>
-                      <EllipsisIcon />
-                    </IconSlot>
-                    <BottomRow></BottomRow>
-                  </ToggleGroupTool>
-                </ToggleGroup>
-              </ToolbarWrapper> */}
-          </div>
-        </TooltipProvider>
-      </Form>
-      <DefaultEditView {...props} />
-    </>
-  )
+  return <DefaultEditView {...props} />
 }
+
 import type { DocumentViewClientProps } from 'payload'
+import { DefaultEditView } from '../payload-ui/views/Edit'
 Toolbar.Wrapper = ToolbarWrapper
 Toolbar.Group = Group
 Toolbar.Tool = Tool
