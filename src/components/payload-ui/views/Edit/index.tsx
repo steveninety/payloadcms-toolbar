@@ -466,49 +466,51 @@ export function DefaultEditView({
           onChange={[onChange]}
           onSuccess={onSave}
         >
-          <DocumentControls
-            apiURL={apiURL}
-            BeforeDocumentControls={BeforeDocumentControls}
-            customComponents={{
-              PreviewButton,
-              PublishButton,
-              SaveButton,
-              SaveDraftButton,
-            }}
-            data={savedDocumentData}
-            disableActions={disableActions || isFolderCollection}
-            disableCreate={disableCreate}
-            EditMenuItems={EditMenuItems}
-            hasPublishPermission={hasPublishPermission}
-            hasSavePermission={hasSavePermission}
-            id={id}
-            isEditing={isEditing}
-            isInDrawer={isInDrawer}
-            onDelete={onDelete}
-            onDrawerCreateNew={clearDoc}
-            onDuplicate={onDuplicate}
-            onSave={onSave}
-            onTakeOver={() =>
-              handleTakeOver(
-                id,
-                collectionSlug,
-                globalSlug,
-                user,
-                true,
-                updateDocumentEditor,
-                setCurrentEditor,
-                documentLockStateRef,
-                isLockingEnabled,
-                setIsReadOnlyForIncomingUser,
-              )
-            }
-            permissions={docPermissions}
-            readOnlyForIncomingUser={isReadOnlyForIncomingUser}
-            redirectAfterDelete={redirectAfterDelete}
-            redirectAfterDuplicate={redirectAfterDuplicate}
-            slug={collectionConfig?.slug || globalConfig?.slug}
-            user={currentEditor}
-          />
+          <div className="md:w-16 md:h-[calc(100vh-var(--spacing-view-bottom)-var(--app-header-height))] sticky top-0">
+            <DocumentControls
+              apiURL={apiURL}
+              BeforeDocumentControls={BeforeDocumentControls}
+              customComponents={{
+                PreviewButton,
+                PublishButton,
+                SaveButton,
+                SaveDraftButton,
+              }}
+              data={savedDocumentData}
+              disableActions={disableActions || isFolderCollection}
+              disableCreate={disableCreate}
+              EditMenuItems={EditMenuItems}
+              hasPublishPermission={hasPublishPermission}
+              hasSavePermission={hasSavePermission}
+              id={id}
+              isEditing={isEditing}
+              isInDrawer={isInDrawer}
+              onDelete={onDelete}
+              onDrawerCreateNew={clearDoc}
+              onDuplicate={onDuplicate}
+              onSave={onSave}
+              onTakeOver={() =>
+                handleTakeOver(
+                  id,
+                  collectionSlug,
+                  globalSlug,
+                  user,
+                  true,
+                  updateDocumentEditor,
+                  setCurrentEditor,
+                  documentLockStateRef,
+                  isLockingEnabled,
+                  setIsReadOnlyForIncomingUser,
+                )
+              }
+              permissions={docPermissions}
+              readOnlyForIncomingUser={isReadOnlyForIncomingUser}
+              redirectAfterDelete={redirectAfterDelete}
+              redirectAfterDuplicate={redirectAfterDuplicate}
+              slug={collectionConfig?.slug || globalConfig?.slug}
+              user={currentEditor}
+            />
+          </div>
           <div className="w-full">
             {isInDrawer && (
               <DocumentDrawerHeader drawerSlug={drawerSlug} showDocumentID={!isFolderCollection} />

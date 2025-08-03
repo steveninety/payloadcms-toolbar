@@ -96,103 +96,129 @@
 //   }
 // }
 
-html {
-  opacity: 0;
+// html {
+//   opacity: 0;
+// }
+// 
+// html[data-theme='dark'],
+// html[data-theme='light'] {
+//   opacity: initial;
+// }
+// 
+// // Button reset styles to override user agent defaults
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
-html[data-theme='dark'],
-html[data-theme='light'] {
-  opacity: initial;
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari, Opera */
 }
 
-// Button reset styles to override user agent defaults
 button {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  
-  // Reset font properties
-  font-family: inherit;
-  font-size: inherit;
-  font-weight: inherit;
-  font-style: inherit;
-  font-variant-ligatures: inherit;
-  font-variant-caps: inherit;
-  font-variant-numeric: inherit;
-  font-variant-east-asian: inherit;
-  font-variant-alternates: inherit;
-  font-variant-position: inherit;
-  font-variant-emoji: inherit;
-  font-stretch: inherit;
-  font-optical-sizing: inherit;
-  font-size-adjust: inherit;
-  font-kerning: inherit;
-  font-feature-settings: inherit;
-  font-variation-settings: inherit;
-  
-  // Reset text properties
-  text-rendering: inherit;
   color: inherit;
-  letter-spacing: inherit;
-  word-spacing: inherit;
-  line-height: inherit;
-  text-transform: inherit;
-  text-indent: inherit;
-  text-shadow: inherit;
-  
-  // Reset layout properties
-  display: inherit;
-  text-align: inherit;
-  cursor: inherit;
-  box-sizing: border-box;
-  
-  // Reset background and border
+  //   appearance: none;
+  //   -webkit-appearance: none;
+  //   -moz-appearance: none;
+  //   
+  //   // Reset font properties
+  //   font-family: inherit;
+  //   font-size: inherit;
+  //   font-weight: inherit;
+  //   font-style: inherit;
+  //   font-variant-ligatures: inherit;
+  //   font-variant-caps: inherit;
+  //   font-variant-numeric: inherit;
+  //   font-variant-east-asian: inherit;
+  //   font-variant-alternates: inherit;
+  //   font-variant-position: inherit;
+  //   font-variant-emoji: inherit;
+  //   font-stretch: inherit;
+  //   font-optical-sizing: inherit;
+  //   font-size-adjust: inherit;
+  //   font-kerning: inherit;
+  //   font-feature-settings: inherit;
+  //   font-variation-settings: inherit;
+  //   
+  //   // Reset text properties
+  //   text-rendering: inherit;
+  //   color: inherit;
+  //   letter-spacing: inherit;
+  //   word-spacing: inherit;
+  //   line-height: inherit;
+  //   text-transform: inherit;
+  //   text-indent: inherit;
+  //   text-shadow: inherit;
+  //   
+  //   // Reset layout properties
+  //   display: inherit;
+  //   text-align: inherit;
+  //   cursor: inherit;
+  //   box-sizing: border-box;
+  //   
+  //   // Reset background and border
   background-color: transparent;
-  background-image: none;
-  border: none;
-  border-width: 0;
-  border-style: none;
-  border-color: transparent;
-  border-image: none;
-  border-radius: 0;
-  
-  // Reset spacing
-  margin: 0;
-  padding: 0;
-  
-  // Reset other properties
-  outline: none;
-  box-shadow: none;
-  
-  // Ensure proper behavior
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  
-  // Remove focus outline (will be handled by Tailwind/component styles)
-  &:focus {
-    outline: none;
-  }
-  
-  // Remove default button styling
-  &:active {
-    outline: none;
-  }
+  //   background-image: none;
+  //   border: none;
+  //   border-width: 0;
+  //   border-style: none;
+  //   border-color: transparent;
+  //   border-image: none;
+  //   border-radius: 0;
+  //   
+  //   // Reset spacing
+  //   margin: 0;
+  //   padding: 0;
+  //   
+  //   // Reset other properties
+  //   outline: none;
+  //   box-shadow: none;
+  //   
+  //   // Ensure proper behavior
+  //   user-select: none;
+  //   -webkit-user-select: none;
+  //   -moz-user-select: none;
+  //   -ms-user-select: none;
+  //   
+  //   // Remove focus outline (will be handled by Tailwind/component styles)
+  //   &:focus {
+  //     outline: none;
+  //   }
+  //   
+  //   // Remove default button styling
+  //   &:active {
+  //     outline: none;
+  //   }
 }
 
-:is([class*='u-text-style-'], h1, h2, h3, h4, h5, h6, p, blockquote, span) {
+.border {
+  border-width: 1px;
+  border-style: solid
+}
+
+:is([class*='u-text-style-'], h1, h2, h3, h4, h5, h6, p, blockquote) {
   display: flow-root;
 }
 
-:is([class*='u-text-style-'], h1, h2, h3, h4, h5, h6, p, blockquote, span)::before {
+:is([class*='u-text-style-'], h1, h2, h3, h4, h5, h6, p, blockquote)::before {
   content: '';
   display: table;
   margin-bottom: calc(-0.5lh + 0.38em);
 }
 
-:is([class*='u-text-style-'], h1, h2, h3, h4, h5, h6, p, blockquote, span)::after {
+:is([class*='u-text-style-'], h1, h2, h3, h4, h5, h6, p, blockquote)::after {
   content: '';
   display: table;
   margin-bottom: calc(-0.5lh + 0.38em);
+}
+
+.toolbar__outer-wrapper {
+  @media (min-width: 768px) {
+    transform: translateX(-50%);
+    margin-top: calc(var(--base)*1.5);
+  }
 }

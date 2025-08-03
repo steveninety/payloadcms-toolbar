@@ -47,6 +47,9 @@ export const Posts: CollectionConfig<'posts'> = {
       description: true,
     },
   },
+  versions: {
+    drafts: true,
+  },
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {

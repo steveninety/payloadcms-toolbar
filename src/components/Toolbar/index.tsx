@@ -30,14 +30,16 @@ const ToolContext = React.createContext<{ selected: boolean }>({ selected: false
 
 export function ToolbarWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-row md:flex-col px-4 md:px-0 mx-0 md:mx-4 sticky top-0 md:top-4 bg-background z-10 items-center border border-border rounded-lg h-fit">
-      {children}
+    <div className="toolbar__outer-wrapper md:w-8 md:absolute md:inset-0 md:left-1/2 md:overflow-y-auto scrollbar-hide">
+      <div className="toolbar__inner-wrapper flex flex-row md:flex-col px-4 md:px-0 md:py-4 sticky top-0 md:top-[var(--doc-controls-height)] overflow-x-auto md:overflow-x-hidden md:overflow-y-auto bg-background z-10 items-center border border-muted rounded-lg h-fit">
+        {children}
+      </div>
     </div>
   )
 }
 
 export function Group({ children }: { children: React.ReactNode }) {
-  return <div className="flex flex-row md:flex-col items-center space-x-1 m-0.5">{children}</div>
+  return <div className="flex flex-row md:flex-col items-center gap-1 m-0.5">{children}</div>
 }
 
 interface TopRowProps {
@@ -57,7 +59,7 @@ export function TopRow({ children, variant = 'text', color = 'bg-green-400' }: T
 
 export function TopRowDot({ children, color = 'bg-green-400' }: TopRowProps) {
   return (
-    <div className="w-full absolute top-1/2 right-0 bottom-0">
+    <div className="w-full absolute bottom-1/2 right-0" style={{ transform: 'translateY(50%)' }}>
       <div className="flex justify-end">
         <div className={`w-1.5 h-1.5 ${color} rounded-full`} />
       </div>
@@ -90,12 +92,12 @@ export function IconSlot({ children }: IconSlotProps) {
 
   if (isIcon && children.props) {
     // Clone the element and merge the className
-    const iconClasses = selected ? 'w-4 h-4 text-foreground' : 'w-4 h-4 text-muted-foreground'
+    const iconClasses = selected ? 'w-5 h-5 text-foreground' : 'w-5 h-5 text-muted-foreground'
 
     return (
       <div className="flex items-center justify-center">
         {React.cloneElement(children as React.ReactElement<any>, {
-          className: `${iconClasses} ${(children.props as any).className || ''}`.trim(),
+          className: `w-5 h-5 text-foreground ${(children.props as any).className || ''}`.trim(),
         })}
       </div>
     )
@@ -187,13 +189,39 @@ Tool.displayName = 'Tool'
 interface TooltipToolProps {
   children: React.ReactNode
   tooltip: React.ReactNode
+  side?: 'top' | 'bottom' | 'left' | 'right' | 'responsive'
 }
 
-export function TooltipTool({ children, tooltip }: TooltipToolProps) {
+export function TooltipTool({ children, tooltip, side = 'responsive' }: TooltipToolProps) {
+  const [currentSide, setCurrentSide] = React.useState<'top' | 'bottom' | 'left' | 'right'>(
+    'bottom',
+  )
+
+  React.useEffect(() => {
+    if (side === 'responsive') {
+      const updateSide = () => {
+        // Check if screen is md (768px) or larger
+        const isMd = window.matchMedia('(min-width: 768px)').matches
+        setCurrentSide(isMd ? 'left' : 'bottom')
+      }
+
+      updateSide() // Set initial value
+
+      const mediaQuery = window.matchMedia('(min-width: 768px)')
+      mediaQuery.addEventListener('change', updateSide)
+
+      return () => mediaQuery.removeEventListener('change', updateSide)
+    } else {
+      setCurrentSide(side)
+    }
+  }, [side])
+
   return (
     <Tooltip delayDuration={0}>
       <TooltipTrigger asChild>{children}</TooltipTrigger>
-      <TooltipContent>{tooltip}</TooltipContent>
+      <TooltipPortal>
+        <TooltipContent side={currentSide}>{tooltip}</TooltipContent>
+      </TooltipPortal>
     </Tooltip>
   )
 }
@@ -245,6 +273,7 @@ export default function Toolbar(props: DocumentViewClientProps) {
 
 import type { DocumentViewClientProps } from 'payload'
 import { DefaultEditView } from '../payload-ui/views/Edit'
+import { TooltipPortal } from '@radix-ui/react-tooltip'
 Toolbar.Wrapper = ToolbarWrapper
 Toolbar.Group = Group
 Toolbar.Tool = Tool

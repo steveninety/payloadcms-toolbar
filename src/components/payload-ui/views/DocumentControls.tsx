@@ -214,8 +214,19 @@ export const DocumentControls: React.FC<{
               )}
             </Fragment>
           )}
-          {/* <SaveDraftButton />
-          <PublishButton /> */}
+          <SaveDraftButton />
+          <PublishButton />
+          <PublishButton />
+          <PublishButton />
+          <PublishButton />
+          <PublishButton />
+          <PublishButton />
+          <PublishButton />
+          <PublishButton />
+          <PublishButton />
+          <PublishButton />
+          <PublishButton />
+          <PublishButton />
           <TB.TooltipTool tooltip="More Options">
             <TB.DropdownTool
               dropdownItems={

@@ -15,6 +15,7 @@ import {
 } from '@payloadcms/ui'
 import { FormSubmit } from './FormSubmit'
 import { cn } from '@/utilities/ui'
+import { formatTimeAgoCompact } from '@/utilities/formatTimeAgoCompact'
 import Toolbar, { TooltipTool } from '../Toolbar'
 import { SaveIcon } from 'lucide-react'
 
@@ -27,8 +28,15 @@ export const SaveDraftButton = React.forwardRef<
     children?: React.ReactNode
   }
 >((props, ref) => {
-  const { id, collectionSlug, globalSlug, setUnpublishedVersionCount, uploadStatus } = useDocumentInfo()
-  const { t } = useTranslation()
+  const {
+    id,
+    collectionSlug,
+    globalSlug,
+    savedDocumentData,
+    setUnpublishedVersionCount,
+    uploadStatus,
+  } = useDocumentInfo()
+  const { t, i18n } = useTranslation()
   const { code: localeCode } = useLocale()
   const {
     config: {
@@ -40,10 +48,22 @@ export const SaveDraftButton = React.forwardRef<
   const { submit } = useForm()
   const modified = useFormModified()
   const operation = useOperation()
-  
+
   // This is the crucial logic that was missing!
   const disabled = (operation === 'update' && !modified) || uploadStatus === 'uploading'
-  
+
+  // Format time ago for display using savedDocumentData.updatedAt
+  const timeAgoText = savedDocumentData?.updatedAt
+    ? formatTimeAgoCompact(savedDocumentData.updatedAt)
+    : null
+
+  console.log(
+    'savedDocumentData?.updatedAt',
+    savedDocumentData?.updatedAt,
+    'timeAgoText',
+    timeAgoText,
+  )
+
   const handleSaveDraft = useCallback(async () => {
     if (disabled) {
       return
@@ -74,7 +94,17 @@ export const SaveDraftButton = React.forwardRef<
     })
 
     setUnpublishedVersionCount((count) => count + 1)
-  }, [disabled, submit, collectionSlug, globalSlug, id, localeCode, serverURL, api, setUnpublishedVersionCount])
+  }, [
+    disabled,
+    submit,
+    collectionSlug,
+    globalSlug,
+    id,
+    localeCode,
+    serverURL,
+    api,
+    setUnpublishedVersionCount,
+  ])
 
   return (
     <FormSubmit
@@ -82,27 +112,30 @@ export const SaveDraftButton = React.forwardRef<
       disabled={disabled}
       onClick={handleSaveDraft}
       type="button"
-      render={({ buttonProps, disabled: formDisabled }) => (
-        <TooltipTool tooltip={t('version:saveDraft')}>
-          <button
-            {...buttonProps}
-            ref={ref}
-            className={cn(
-              'w-8 flex flex-col items-center relative p-1 gap-1 rounded-sm !border-none',
-              (disabled || formDisabled) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-muted',
-              props.className,
-            )}
-          >
-            <Toolbar.TopRow>
-              <Toolbar.TopRowDot color="bg-green-400" />
-            </Toolbar.TopRow>
-            <Toolbar.IconSlot>
-              <SaveIcon />
-            </Toolbar.IconSlot>
-            <Toolbar.BottomRow>30s</Toolbar.BottomRow>
-          </button>
-        </TooltipTool>
-      )}
+      render={({ buttonProps, disabled: formDisabled }) => {
+        const isDisabled = disabled || formDisabled
+        return (
+          <TooltipTool tooltip={t('version:saveDraft')}>
+            <button
+              {...buttonProps}
+              ref={ref}
+              className={cn(
+                'w-8 flex flex-col items-center relative p-1 gap-1 rounded-sm !border-none',
+                isDisabled ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-muted',
+                props.className,
+              )}
+            >
+              <Toolbar.TopRow>
+                <Toolbar.TopRowDot color="bg-green-400" />
+              </Toolbar.TopRow>
+              <Toolbar.IconSlot>
+                <SaveIcon className={isDisabled ? 'opacity-50' : ''} />
+              </Toolbar.IconSlot>
+              <Toolbar.BottomRow>{timeAgoText || '-'}</Toolbar.BottomRow>
+            </button>
+          </TooltipTool>
+        )
+      }}
     />
   )
 })
