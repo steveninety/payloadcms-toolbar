@@ -57,13 +57,13 @@ export const Pages: CollectionConfig<'pages'> = {
       }),
     useAsTitle: 'title',
     components: {
-      views: {
-        edit: {
-          root: {
-            Component: '@/components/Toolbar',
-          },
-        },
-      },
+      // views: {
+      // edit: {
+      // root: {
+      // Component: '@/components/Toolbar',
+      // },
+      // },
+      // },
       edit: {},
     },
   },
